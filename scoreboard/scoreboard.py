@@ -1,10 +1,20 @@
 import cgi
 import datetime
 import wsgiref.handlers
+import os
+import urllib
 
 from google.appengine.ext import db
 from google.appengine.api import users
-from google.appengine.ext import webapp
+#from google.appengine.ext import webapp
+
+import jinja2
+import webapp2
+
+JINJA_ENVIRONMENT = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+    extensions=['jinja2.ext.autoescape'],
+    autoescape=True)
 
 class Team(db.Model):
 	name = db.StringProperty(multiline=False)			#Nombre equipo
@@ -14,7 +24,7 @@ class Team(db.Model):
 	score_code = db.StringProperty(multiline=False)		#Puntaje codigo
 	score_teamwork = db.StringProperty(multiline=False)	#Puntaje trabajo equipo
 
-class MainPage(webapp.RequestHandler):
+class MainPage(webapp2.RequestHandler):
 	def get(self):
 		self.response.out.write('<html><body>')
 		self.response.out.write("""
@@ -44,7 +54,7 @@ class MainPage(webapp.RequestHandler):
 
 #TODO: Proteger pagina para modificar puntajes
 #Google login?
-class CreateTeam(webapp.RequestHandler):
+class CreateTeam(webapp2.RequestHandler):
 	def post(self):
 		team = Team()
 		team.name = self.request.get('name')
@@ -56,48 +66,23 @@ class CreateTeam(webapp.RequestHandler):
 		team.put()
 		self.redirect('/scores')
 
-class ScorePage(webapp.RequestHandler):
+class ScorePage(webapp2.RequestHandler):
 	def get(self):
 
-		highscores = db.GqlQuery("SELECT * "
+		scores = db.GqlQuery("SELECT * "
 			"FROM Team "
 			"ORDER BY score_total DESC")
 
-		self.response.out.write("""
-			<html>
-			<body>
-			<p>Scoreboard</p>
-			<table>
-			<tr>
-				<td>Nombre</td>
-				<td>Puntaje Programacion</td>
-				<td>Puntaje Trabajo Equipo</td>
-				<td>Puntaje Ronda 1</td>
-				<td>Puntaje Ronda 2</td>
-				<td>Puntaje Total</td>
-			</tr>
-			""")
-		for sc in highscores:
-			self.response.out.write("""
-				<tr>
-					<td>"""+sc.name+"""</td>
-					<td>"""+sc.score_code+"""</td>
-					<td>"""+sc.score_teamwork+"""</td>
-					<td>"""+sc.score_round1+"""</td>
-					<td>"""+sc.score_round2+"""</td>
-					<td>"""+sc.score_total+"""</td>
-				</tr>""")
-		self.response.out.write("""<body><html>""")
+		template_values = {
+            'scores': scores,
+        }
 
-application = webapp.WSGIApplication([
+		template = JINJA_ENVIRONMENT.get_template('index.html')
+		self.response.write(template.render(template_values))
+
+app = webapp2.WSGIApplication([
 	('/', MainPage),
 	('/create', CreateTeam),
 	('/scores', ScorePage)
 	], debug=True)
 
-
-def main():
-	wsgiref.handlers.CGIHandler().run(application)
-
-if __name__ == '__main__':
-	main()
