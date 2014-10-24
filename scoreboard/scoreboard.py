@@ -24,33 +24,24 @@ class Team(db.Model):
 	score_code = db.StringProperty(multiline=False)		#Puntaje codigo
 	score_teamwork = db.StringProperty(multiline=False)	#Puntaje trabajo equipo
 
-class MainPage(webapp2.RequestHandler):
+class AddTeam(webapp2.RequestHandler):
 	def get(self):
-		self.response.out.write('<html><body>')
-		self.response.out.write("""
-			<p>Create team</p>
-			<form action="/create" method="post">
-			<div>Team name: <textarea name="name" rows="1" cols="30"></textarea></div>
-			<div>Total score: <textarea name="score_total" rows="1" cols="10"></textarea></div>
-			<div>First round score: <textarea name="score_round1" rows="1" cols="10"></textarea></div>
-			<div>Second round score: <textarea name="score_round2" rows="1" cols="10"></textarea></div>
-			<div>Code score: <textarea name="score_code" rows="1" cols="10"></textarea></div>
-			<div>Teamwork score: <textarea name="score_teamwork" rows="1" cols="10"></textarea></div>
-			<div><input type="submit" value="Create team"></div>
-			</form>
-			<p>Update</p>
-			<select>
-			""")
-
 		#List all teams
 		query = Team.all()
 		query.order('name')
 		#first, lets see if there's any team in the system
 		results = query.get()
+		teams = []
 		if results: #If there is...
 			for team in query.run(): #We show them
-				self.response.out.write("""<option value="">"""+team.name+"""</option>""")
-		self.response.out.write("""<body><html>""")
+				teams.append(team)
+
+		template_values = {
+            'teams': teams,
+        }
+
+		template = JINJA_ENVIRONMENT.get_template('create_team.html')
+		self.response.write(template.render(template_values))
 
 #TODO: Proteger pagina para modificar puntajes
 #Google login?
@@ -64,7 +55,7 @@ class CreateTeam(webapp2.RequestHandler):
 		team.score_teamwork = self.request.get('score_teamwork')
 		team.score_code = self.request.get('score_code')
 		team.put()
-		self.redirect('/scores')
+		self.redirect('/')
 
 class ScorePage(webapp2.RequestHandler):
 	def get(self):
@@ -77,12 +68,12 @@ class ScorePage(webapp2.RequestHandler):
             'scores': scores,
         }
 
-		template = JINJA_ENVIRONMENT.get_template('index.html')
+		template = JINJA_ENVIRONMENT.get_template('scores.html')
 		self.response.write(template.render(template_values))
 
 app = webapp2.WSGIApplication([
-	('/', MainPage),
+	('/', ScorePage),
 	('/create', CreateTeam),
-	('/scores', ScorePage)
+	('/add', AddTeam)
 	], debug=True)
 

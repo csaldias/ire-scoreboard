@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<!-- Le falta glamour al HTMl, esta cosa es muy fea! -->
+<html>
+	<head>
+		<title>Scoreboard IRE 2014</title>
+	</head>
+	<body>
+		<p>Scoreboard</p>
+		<table>
+			<tr>
+				<td>Nombre</td>
+				<td>Puntaje Programacion</td>
+				<td>Puntaje Trabajo Equipo</td>
+				<td>Puntaje Ronda 1</td>
+				<td>Puntaje Ronda 2</td>
+				<td>Puntaje Total</td>
+			</tr>
+			{% for team in scores %}
+				<tr>
+					<td>{{ team.name }}</td>
+					<td>{{ team.score_code }}</td>
+					<td>{{ team.score_teamwork }}</td>
+					<td>{{ team.score_round1 }}</td>
+					<td>{{ team.score_round2 }}</td>
+					<td>{{ team.score_total }}</td>
+				</tr>
+			{% endfor %}
+			<!-- Aca van todos los puntajes -->
+		</table>
+		<!-- Algun footer? -->
+	</body>
+</html>
+{% endautoescape %}
