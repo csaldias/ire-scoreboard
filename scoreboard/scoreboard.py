@@ -18,6 +18,8 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 class Team(db.Model):
 	name = db.StringProperty(multiline=False)			#Nombre equipo
+	team_id = db.StringProperty(multiline=False)		#ID Equipo
+	category = db.StringProperty(multiline=False)		#Categoria: Avanzado, Basico
 	score_total = db.StringProperty(multiline=False)	#Puntaje total
 	score_round1 = db.StringProperty(multiline=False)	#Puntaje ronda 1
 	score_round2 = db.StringProperty(multiline=False)	#Puntaje ronda 2
@@ -48,12 +50,27 @@ class AddTeam(webapp2.RequestHandler):
 class CreateTeam(webapp2.RequestHandler):
 	def post(self):
 		team = Team()
+		team.team_id = self.request.get('team_id')
 		team.name = self.request.get('name')
+		team.category = self.request.get('category')
 		team.score_total = self.request.get('score_total')
 		team.score_round1 = self.request.get('score_round1')
 		team.score_round2 = self.request.get('score_round2')
 		team.score_teamwork = self.request.get('score_teamwork')
 		team.score_code = self.request.get('score_code')
+		team.put()
+		self.redirect('/')
+
+class UpdateTeam(webapp2.RequestHandler):
+	def post(self):
+		query = Team.all()
+		query.filter('team_id =', self.request.get('team_id'))
+		team = query.get()
+		if self.request.get('score_total'): team.score_total = self.request.get('score_total')
+		if self.request.get('score_round1'): team.score_round1 = self.request.get('score_round1')
+		if self.request.get('score_round2'): team.score_round2 = self.request.get('score_round2')
+		if self.request.get('score_teamwork'): team.score_teamwork = self.request.get('score_teamwork')
+		if self.request.get('score_code'): team.score_code = self.request.get('score_code')
 		team.put()
 		self.redirect('/')
 
@@ -71,9 +88,42 @@ class ScorePage(webapp2.RequestHandler):
 		template = JINJA_ENVIRONMENT.get_template('scores.html')
 		self.response.write(template.render(template_values))
 
+class ScoreBasico(webapp2.RequestHandler):
+	def get(self):
+
+		scores = db.GqlQuery("SELECT * "
+			"FROM Team "
+			"WHERE category = 'Basico'"
+			"ORDER BY score_total DESC")
+
+		template_values = {
+            'scores': scores,
+        }
+
+		template = JINJA_ENVIRONMENT.get_template('scores_basico.html')
+		self.response.write(template.render(template_values))
+
+class ScoreAvanzado(webapp2.RequestHandler):
+	def get(self):
+
+		scores = db.GqlQuery("SELECT * "
+			"FROM Team "
+			"WHERE category = 'Avanzado'"
+			"ORDER BY score_total DESC")
+
+		template_values = {
+            'scores': scores,
+        }
+
+		template = JINJA_ENVIRONMENT.get_template('scores_avanzado.html')
+		self.response.write(template.render(template_values))
+
 app = webapp2.WSGIApplication([
 	('/', ScorePage),
+	('/score-basico', ScoreBasico),
+	('/score-avanzado', ScoreAvanzado),
 	('/create', CreateTeam),
+	('/update', UpdateTeam),
 	('/add', AddTeam)
 	], debug=True)
 

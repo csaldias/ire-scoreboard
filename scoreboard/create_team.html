@@ -8,7 +8,9 @@
 	<body>
 		<p>Create team</p>
 			<form action="/create" method="post">
+			<div>Team ID: <textarea name="team_id" rows="1" cols="30"></textarea></div>
 			<div>Team name: <textarea name="name" rows="1" cols="30"></textarea></div>
+			<div>Category: <textarea name="category" rows="1" cols="30"></textarea></div>
 			<div>Total score: <textarea name="score_total" rows="1" cols="10"></textarea></div>
 			<div>First round score: <textarea name="score_round1" rows="1" cols="10"></textarea></div>
 			<div>Second round score: <textarea name="score_round2" rows="1" cols="10"></textarea></div>
@@ -16,13 +18,23 @@
 			<div>Teamwork score: <textarea name="score_teamwork" rows="1" cols="10"></textarea></div>
 			<div><input type="submit" value="Create team"></div>
 			</form>
-			<p>Update</p>
+		<p>Update</p>
+			<form action="/update" method="post">
+			<div>Team ID: <textarea name="team_id" rows="1" cols="30"></textarea></div>
+			<div>Total score: <textarea name="score_total" rows="1" cols="10"></textarea></div>
+			<div>First round score: <textarea name="score_round1" rows="1" cols="10"></textarea></div>
+			<div>Second round score: <textarea name="score_round2" rows="1" cols="10"></textarea></div>
+			<div>Code score: <textarea name="score_code" rows="1" cols="10"></textarea></div>
+			<div>Teamwork score: <textarea name="score_teamwork" rows="1" cols="10"></textarea></div>
+			<div><input type="submit" value="Update team"></div>
+			</form>
+			<!--
 			<select>
 			{% for team in teams %}
 				<option value="">{{ team.name }}</option>
 			{% endfor %}
 			</select>
-		<!-- Algun footer? -->
+		Algun footer? -->
 	</body>
 </html>
 {% endautoescape %}
